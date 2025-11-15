@@ -37,9 +37,26 @@ pip install requests beautifulsoup4
 
 ## Usage
 
-### Basic Usage
+### Option 1: Run on GitHub (Recommended)
 
-Run the extractor with default settings:
+You can run the extractor directly on GitHub using GitHub Actions - no local setup required!
+
+1. Go to your repository on GitHub
+2. Click on the **Actions** tab
+3. Select **Run Berkshire Hathaway Extractor** from the workflows list
+4. Click **Run workflow** button
+5. Configure options:
+   - **max_pages**: Leave empty for full extraction, or enter a number (e.g., `50`) for testing
+   - **output_dir**: Leave as default or customize
+6. Click the green **Run workflow** button
+7. Wait for the workflow to complete (check progress in the Actions tab)
+8. Download the extracted materials as a ZIP artifact from the workflow run
+
+The extracted materials will be packaged as `berkshire-materials.tar.gz` and available for download for 7 days.
+
+### Option 2: Run Locally
+
+Run the extractor with default settings on your local machine:
 
 ```bash
 python berkshire_extractor.py
