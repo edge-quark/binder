@@ -1,0 +1,92 @@
+name: Run Berkshire Hathaway Extractor
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: 'Maximum pages to crawl (leave empty for unlimited)'
+        required: false
+        default: ''
+      output_dir:
+        description: 'Output directory name'
+        required: false
+        default: 'berkshire_materials'
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run extractor
+      run: |
+        if [ -z "${{ github.event.inputs.max_pages }}" ]; then
+          echo "Running full extraction (no page limit)..."
+          python berkshire_extractor.py
+        else
+          echo "Running extraction with ${{ github.event.inputs.max_pages }} page limit..."
+          python -c "
+from berkshire_extractor import BerkshireExtractor
+extractor = BerkshireExtractor(output_dir='${{ github.event.inputs.output_dir }}')
+extractor.crawl(max_pages=${{ github.event.inputs.max_pages }})
+          "
+        fi
+
+    - name: Create archive
+      run: |
+        OUTPUT_DIR="${{ github.event.inputs.output_dir }}"
+        if [ -z "$OUTPUT_DIR" ]; then
+          OUTPUT_DIR="berkshire_materials"
+        fi
+
+        if [ -d "$OUTPUT_DIR" ]; then
+          tar -czf berkshire-materials.tar.gz "$OUTPUT_DIR"
+          echo "Archive created: berkshire-materials.tar.gz"
+          ls -lh berkshire-materials.tar.gz
+        fi
+
+    - name: Upload extracted materials as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: berkshire-materials
+        path: berkshire-materials.tar.gz
+        retention-days: 7
+        compression-level: 0  # Already compressed
+
+    - name: Display summary
+      run: |
+        OUTPUT_DIR="${{ github.event.inputs.output_dir }}"
+        if [ -z "$OUTPUT_DIR" ]; then
+          OUTPUT_DIR="berkshire_materials"
+        fi
+
+        echo "## Extraction Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ -d "$OUTPUT_DIR" ]; then
+          for dir in "$OUTPUT_DIR"/*; do
+            if [ -d "$dir" ]; then
+              count=$(find "$dir" -type f | wc -l)
+              dirname=$(basename "$dir")
+              echo "- **$dirname**: $count files" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          total=$(find "$OUTPUT_DIR" -type f | wc -l)
+          size=$(du -sh "$OUTPUT_DIR" | cut -f1)
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total files**: $total" >> $GITHUB_STEP_SUMMARY
+          echo "**Total size**: $size" >> $GITHUB_STEP_SUMMARY
+        fi
