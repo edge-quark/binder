@@ -163,13 +163,11 @@ Figure~\ref{fig:ambient_ism} shows the ISM band in more detail.
 
 \section{Conclusion}
 
-The Molex 206760 antenna is supposed to have good performance from $1710$--$2700\,\text{MHz}$ with resonance at $1834\,\text{MHz}$, but in our lab setup it just reflected everything back. Our $S_{11}$ stayed around $-20\,\text{dBm}$ (basically the generator baseline) across the cellular band, which means really bad impedance mismatch. Most of the reflection was probably at the connectors rather than the antenna itself.
+The antenna is supposed to work well from $1710$--$2700\,\text{MHz}$ with resonance at $1834\,\text{MHz}$, but our measurements didn't match the spec sheet at all. $S_{11}$ stayed around $-20\,\text{dBm}$ across the cellular band - basically everything got reflected. This was probably because of the crude SMA connections on the test board, plus having it sitting on a metal bench instead of free space like the manufacturer tested it. Our setup also doesn't have the matching networks this antenna needs.
 
-The main problems were likely the crude SMA connections mentioned in the lab manual, environmental effects from the metal bench and other equipment, and the fact that our test board doesn't have the proper matching networks this antenna is designed for.
+Even with the bad matching, we still picked up a signal at $2403\,\text{MHz}$ that's likely Bluetooth or Wi-Fi from devices in the lab. So even a poorly matched antenna can receive if the signal is strong enough.
 
-Despite the terrible $S_{11}$, we still detected ambient signals - specifically a strong peak at $2403\,\text{MHz}$ that's probably Bluetooth or Wi-Fi. This shows that even poorly matched antennas can work as receivers when the signal is strong enough.
-
-Overall, this lab highlighted the gap between spec sheet conditions and real-world measurements. Antenna performance is really sensitive to connections, environment, and mounting. You need proper test equipment (like a vector network analyzer with calibration) to get results that match the specs.
+The main takeaway is that spec sheet performance assumes ideal conditions. In a real lab setup with imperfect connections and environmental interference, you won't get those numbers without proper equipment like a VNA with calibration.
 
 \section*{Acknowledgments}
 Thanks to the lab instructors for the help with the spectrum analyzer and for answering our questions.
