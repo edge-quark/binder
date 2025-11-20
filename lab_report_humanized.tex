@@ -1,0 +1,246 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Laboratory Report: The Damped Driven Harmonic Oscillator \\ \large Section: Antenna Measurement}
+\author{Eni Hoxhalli \& Partner Name}
+\date{November 27, 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+For the last part of our lab session with the Rohde \& Schwarz FPC1500 Spectrum Analyzer, we characterized a Molex 206760 Cellular Antenna. The goal was pretty straightforward: measure the antenna's return loss ($S_{11}$) and compare it against what the spec sheet says it should do, then use it to pick up whatever electromagnetic signals are floating around the lab.
+
+Return loss ($S_{11}$) is basically how we evaluate antenna performance. It's the ratio of reflected power to incident power in decibels. When you get a more negative $S_{11}$ value, that means better impedance matching between the antenna and transmission line, so more efficient radiation. What you want to see is a deep dip at the operating frequency—that's where most of the power is actually being radiated instead of bouncing back.
+
+\section{Experimental Setup}
+
+We used a test board with a surface-mount Molex cellular antenna connected through SMA connectors. We ran two different measurement configurations:
+
+\subsection{Return Loss Measurement (S11)}
+\begin{itemize}
+    \item \textbf{Configuration:} Tracking Generator (TG) mode enabled
+    \item \textbf{Generator Output Power:} $-20\,\text{dBm}$
+    \item \textbf{Frequency Range:} $5\,\text{kHz}$ to $3\,\text{GHz}$
+    \item \textbf{Resolution Bandwidth (RBW):} Auto
+    \item \textbf{Video Bandwidth (VBW):} Auto
+    \item \textbf{Measurement:} Power reflected back to port 1 (S11)
+\end{itemize}
+
+\subsection{Ambient Signal Detection}
+\begin{itemize}
+    \item \textbf{Configuration:} Internal source turned off
+    \item \textbf{Frequency Range:} $5\,\text{kHz}$ to $3\,\text{GHz}$
+    \item \textbf{Trace Mode:} Maximum hold
+    \item \textbf{Measurement:} External signals received by antenna
+\end{itemize}
+
+\section{Results and Analysis}
+
+\subsection{Antenna Return Loss ($S_{11}$)}
+
+The return loss tells us how well the antenna radiates power. When you see a dip in the measured power, that's resonance—the energy is being absorbed and radiated rather than reflected. According to the datasheet, the Molex 206760 is designed for cellular bands with these specs:
+
+\begin{itemize}
+    \item \textbf{Operating Range:} $1710\,\text{MHz}$ to $2700\,\text{MHz}$
+    \item \textbf{Resonant Frequency:} $1834\,\text{MHz}$
+    \item \textbf{Minimum Return Loss:} Around $-42.5\,\text{dB}$ at resonance
+\end{itemize}
+
+Figure~\ref{fig:s11_full} shows what we measured across the full $3\,\text{GHz}$ range.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{s11_full_spectrum.png}
+    \caption{Measured return loss ($S_{11}$) from $5\,\text{kHz}$ to $3\,\text{GHz}$. The baseline at around $-20\,\text{dBm}$ is basically the generator output power, meaning almost everything's getting reflected. Green shaded area shows the spec's operating range ($1710$--$2700\,\text{MHz}$), red line marks where we should see resonance at $1834\,\text{MHz}$.}
+    \label{fig:s11_full}
+\end{figure}
+
+\subsubsection{Comparison with Specification Sheet}
+
+Table~\ref{tab:spec_vs_meas} compares what the manufacturer claims versus what we actually measured.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison of Specification vs. Measured Data}
+    \label{tab:spec_vs_meas}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Parameter} & \textbf{Specification} & \textbf{Measured} \\
+        \midrule
+        Resonant Frequency & $1834\,\text{MHz}$ & $1834\,\text{MHz}$ (no dip observed) \\
+        Return Loss at Resonance & $-42.5\,\text{dB}$ & $-21.3\,\text{dBm}$ \\
+        Discrepancy & --- & $+21.2\,\text{dB}$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+So here's the problem: at $1834\,\text{MHz}$, we measured $-21.3\,\text{dBm}$, which is barely different from the generator baseline of $-20\,\text{dBm}$. This means almost everything is getting reflected back—the antenna isn't radiating at all. We should've seen that deep dip down to $-42.5\,\text{dB}$, but it just wasn't there.
+
+Figure~\ref{fig:s11_cellular} gives a closer look at the cellular band region ($1.7$--$2.7\,\text{GHz}$) where this antenna is supposed to work best.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{s11_cellular_band.png}
+    \caption{Close-up of return loss in the cellular band ($1710$--$2700\,\text{MHz}$). Red line shows where resonance should be at $1834\,\text{MHz}$ with a spec value of $-42.5\,\text{dB}$. The marker shows what we actually measured—no dip whatsoever.}
+    \label{fig:s11_cellular}
+\end{figure}
+
+\subsubsection{Effective and Ineffective Frequency Regimes}
+
+Looking at the full spectrum, here's what we found:
+
+\begin{itemize}
+    \item \textbf{Ineffective Range ($0$--$2300\,\text{MHz}$):} The antenna performed poorly across all the lower frequencies, including the entire cellular range it's designed for. The trace just stayed flat near baseline, which means high impedance mismatch and basically no power absorption.
+
+    \item \textbf{Marginally Effective Range ($> 2300\,\text{MHz}$):} We did see a slight downward trend starting around $2300\,\text{MHz}$, hitting a minimum of $-23.8\,\text{dBm}$ near $2380\,\text{MHz}$. While this shows some energy absorption, it's still way below what the specs say it should be doing.
+\end{itemize}
+
+\subsubsection{Discussion of Discrepancies}
+
+The fact that we didn't see the expected resonance—and the overall terrible return loss—probably comes down to a few experimental issues:
+
+\paragraph{Impedance Mismatch at Connections}
+The lab manual actually mentions that the test board has "crude" SMA connections, which is probably an understatement. In RF work, connection quality matters a lot. Bad soldering, loose connectors, or improper grounding create impedance discontinuities that cause reflections right at the connector before the signal even reaches the antenna. Our $S_{11} \approx -20\,\text{dBm}$ suggests most of the reflection is happening at the connector, not the antenna itself.
+
+\paragraph{Environmental Detuning}
+Antennas are really sensitive to what's around them. The manufacturer's measurements were done in free space, but we had our test board sitting on a metal lab bench. This creates several problems:
+\begin{itemize}
+    \item \textbf{Ground plane coupling:} The metal bench acts like an unintended ground plane, changing the antenna's effective electrical length.
+    \item \textbf{Capacitive loading:} Nearby materials (wood, plastic, whatever) shift the resonant frequency.
+    \item \textbf{Multipath interference:} Reflections from equipment and walls mess with the signal.
+\end{itemize}
+
+These environmental factors can shift resonant frequency by a lot—sometimes hundreds of MHz—which might've pushed our actual resonance completely outside the range we measured, or just dampened it so much we couldn't see it.
+
+\paragraph{Test Board Design Limitations}
+The test board's microstrip line and ground plane are different from how this antenna would actually be mounted in real devices. The antenna element is designed for a specific PCB layout with proper impedance matching networks, which our simple test setup didn't have.
+
+\subsection{Ambient Frequency Detection}
+
+For the second part, we turned off the spectrum analyzer's internal source so the antenna could just receive. This let us see what electromagnetic radiation is already present in the lab. The noise floor was sitting around $-76\,\text{dBm}$.
+
+Figure~\ref{fig:ambient_full} shows the full ambient spectrum we detected.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ambient_full_spectrum.png}
+    \caption{Ambient EM spectrum in the lab. Noise floor is about $-76\,\text{dBm}$. You can see some distinct peaks above the noise—those are active wireless signals.}
+    \label{fig:ambient_full}
+\end{figure}
+
+\subsubsection{Detected Signals}
+
+Even though the $S_{11}$ measurements looked terrible, the antenna still picked up ambient signals. Table~\ref{tab:detected_signals} lists the main signals we found above the noise floor.
+
+\begin{table}[H]
+    \centering
+    \caption{Detected Ambient Signals}
+    \label{tab:detected_signals}
+    \begin{tabular}{@{}cccc@{}}
+        \toprule
+        \textbf{Frequency} & \textbf{Power} & \textbf{SNR} & \textbf{Likely Source} \\
+        \midrule
+        $2403\,\text{MHz}$ & $-62.5\,\text{dBm}$ & $13.5\,\text{dB}$ & Wi-Fi / Bluetooth \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The strongest signal showed up at $2403\,\text{MHz}$ with received power of $-62.5\,\text{dBm}$—that's about $13.5\,\text{dB}$ above the noise floor.
+
+\subsubsection{Signal Identification}
+
+The $2403\,\text{MHz}$ signal is right in the $2.4\,\text{GHz}$ ISM band ($2400$--$2485\,\text{MHz}$), which is unlicensed spectrum that hosts a bunch of common wireless stuff:
+
+\paragraph{Wi-Fi (IEEE 802.11b/g/n)}
+$2.4\,\text{GHz}$ Wi-Fi uses $20$ or $40\,\text{MHz}$ wide channels. The most common ones are:
+\begin{itemize}
+    \item Channel 1: $2412\,\text{MHz}$
+    \item Channel 6: $2437\,\text{MHz}$
+    \item Channel 11: $2462\,\text{MHz}$
+\end{itemize}
+
+Our signal at $2403\,\text{MHz}$ is $9\,\text{MHz}$ below Channel 1, so it could be the lower edge of a Channel 1 transmission or maybe in the guard band between channels.
+
+\paragraph{Bluetooth (IEEE 802.15.1)}
+Bluetooth hops across $79$ channels from $2402$--$2480\,\text{MHz}$ with $1\,\text{MHz}$ spacing. The signal at $2403\,\text{MHz}$ matches exactly with Bluetooth channel 1. Given how many Bluetooth devices are typically in a university lab (wireless keyboards, mice, headphones, everyone's phones), this seems pretty likely.
+
+Figure~\ref{fig:ambient_ism} shows the $2.4\,\text{GHz}$ ISM band in detail.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{ambient_ism_band.png}
+    \caption{Zoomed in on the $2.4\,\text{GHz}$ ISM band ($2.3$--$2.5\,\text{GHz}$). Red circle marks our detected peak at $2403\,\text{MHz}$. Green dotted lines show Wi-Fi channel centers (1, 6, and 11). Gray dashed line is the estimated noise floor.}
+    \label{fig:ambient_ism}
+\end{figure}
+
+\paragraph{Conclusion on Signal Source}
+We're pretty confident the $2403\,\text{MHz}$ signal is either:
+\begin{enumerate}
+    \item \textbf{Bluetooth devices:} Perfect frequency match with Bluetooth channel 1
+    \item \textbf{Wi-Fi traffic:} Lower edge of Channel 1
+\end{enumerate}
+
+Both are everywhere in labs these days, and our spectrum analyzer's resolution isn't good enough to tell them apart if they're transmitting at the same time.
+
+\section{Conclusion}
+
+This lab showed both what RF measurements can do and where they fall short in non-ideal conditions. The Molex 206760 antenna is supposed to perform really well from $1710$--$2700\,\text{MHz}$ with a nice deep resonance at $1834\,\text{MHz}$, but in our setup it basically just reflected everything back.
+
+\subsection{Key Findings}
+
+\paragraph{Return Loss Measurement}
+Our $S_{11}$ values stayed within $1$--$2\,\text{dB}$ of the generator baseline ($-20\,\text{dBm}$) across the whole cellular band, which means:
+\begin{itemize}
+    \item Really bad impedance mismatch (VSWR probably $> 10$)
+    \item Almost no power getting radiated at the intended frequencies
+    \item Most reflection happening at the connectors, not the antenna
+\end{itemize}
+
+\paragraph{Ambient Signal Detection}
+Despite the awful $S_{11}$ performance, we still picked up ambient signals:
+\begin{itemize}
+    \item Clear detection of $2.4\,\text{GHz}$ ISM band activity
+    \item Found signal at $2403\,\text{MHz}$ that's probably Wi-Fi or Bluetooth
+    \item Shows that even poorly matched antennas can work as receivers (just not efficiently)
+\end{itemize}
+
+\subsection{Experimental Considerations}
+
+The gap between what the specs promised and what we measured really highlights some important factors in RF engineering:
+
+\begin{enumerate}
+    \item \textbf{Connection Quality:} RF connectors need precise impedance matching, proper torque, and good soldering. Even small imperfections cause major reflections at these frequencies.
+
+    \item \textbf{Environmental Sensitivity:} Antenna performance depends heavily on mounting, proximity to ground planes, and surrounding materials. You can't just compare free-space specs to bench measurements.
+
+    \item \textbf{Test Equipment Calibration:} Professional antenna testing uses vector network analyzers with calibration standards to remove cable and connector losses. Our spectrum analyzer setup, while good for learning, doesn't have those refinements.
+\end{enumerate}
+
+\subsection{Practical Implications}
+
+A few takeaways from this exercise:
+\begin{itemize}
+    \item Antenna integration needs careful PCB layout, ground planes, and matching networks
+    \item Spec sheet numbers represent ideal conditions that you rarely hit in practice
+    \item Even badly mismatched antennas can detect strong nearby signals, just with lower efficiency
+    \item Lab measurements are useful qualitatively but need controlled environments for real quantitative validation
+\end{itemize}
+
+The fact that we could still detect $2.4\,\text{GHz}$ signals despite the poor $S_{11}$ shows how robust modern wireless systems are. Wi-Fi and Bluetooth transmitters put out enough power ($+10$ to $+20\,\text{dBm}$) to overcome antenna inefficiencies and propagation losses in typical indoor spaces.
+
+\section*{Acknowledgments}
+Thanks to the lab instructors for letting us use the spectrum analyzer and antenna test boards, and for helping us throughout the measurements.
+
+\end{document}
